@@ -4,7 +4,6 @@ import (
     "context"
     "fmt"
     "log"
-
    "go.mongodb.org/mongo-driver/bson"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
@@ -15,6 +14,7 @@ type User struct {
     Name,Email,Pwd,Usrnm string
     IsAdmn bool
 }
+var result User // to pass to main
 //Credentials ...
 type Credentials struct{
     Unm,Pwd string
@@ -25,8 +25,8 @@ var Collection *mongo.Collection
 var ClientOptions *options.ClientOptions
 
 //UserValidaiton in LoginPage
-func UserValidaiton(uname,pwd string)(bool){
-    var result User
+func UserValidaiton(uname,pwd string)(bool,User){
+    
     filter := bson.M{"usrnm" : uname,"pwd" : pwd}
     
     client, err := mongo.Connect(context.TODO(), ClientOptions)
@@ -36,12 +36,12 @@ func UserValidaiton(uname,pwd string)(bool){
     Collection := client.Database("admnpanel").Collection("users")
     err = Collection.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
-         return false // no such user 
+         return false,result // no such user 
     }
     fmt.Printf("Found a single document: %+v\n", result)
-    return true // yes credetial exists 
-
+    return true,result // yes credetial exists 
 }
+
 //InsertRec to insert into database
 func InsertRec(name,email,usrName,pwd string,adminStatus bool){
     ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")

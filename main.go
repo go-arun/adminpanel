@@ -7,6 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
+//User ... to store users details from database 
+// type User struct {
+//     Name,Email,Pwd,Usrnm string
+//     IsAdmn bool
+// }
+var loggedUserDetail database.User
 
 var usrName,usrPwd string 
 //LoginPageGet ...
@@ -35,21 +41,23 @@ func HomepagePost(c *gin.Context){
 			usrPwd = value[0]
 		}
 	}
-	usrExists := database.UserValidaiton(usrName,usrPwd)
-	if (!usrExists){ // Login Error
-		c.HTML(
-			http.StatusOK,
-			"login_err.html",
-			gin.H{"title": "User Login"},
-		)
-	}else{ //Login Success
-		c.HTML(
-			http.StatusOK,
-			"home.html",
-			gin.H{"title": "User Login"},
-		)
-
-	}
+	var usrExists bool
+	usrExists,loggedUserDetail = database.UserValidaiton(usrName,usrPwd)
+	fmt.Println("loggedUserDetail-->",loggedUserDetail.Name,usrExists)
+	// if (!usrExists){ // Login Error
+	// 	c.HTML(
+	// 		http.StatusOK,
+	// 		"login_err.html",
+	// 		gin.H{"title": "User Login"},
+	// 	)
+	// }else{ //Login Success
+	// 	val := "Okay"
+	// 	c.HTML(
+	// 		http.StatusOK,
+	// 		"home.html",
+	// 		val,
+	// 	)
+	// }
  }
   //SignupGet ...
 func SignupGet( c *gin.Context){

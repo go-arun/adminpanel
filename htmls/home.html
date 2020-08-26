@@ -7,9 +7,11 @@
 </head>
 <body>
     <form method="POST">
-        <h1>HOME PAGE</h1>
-        <h1>{{ . }}</h1>
-        <input type="submit">
+        <h4 style="color:blue" >Dear {{ .Name }}</h4>
+        <h3>You are successfully Logged into your Home Page!</h3>
+        <input type="submit" value="Logout">
+        <input type="button" value="Admin Panel" style="visibility: {{ .AdmnButonVisibility}} ;">
+        
     </form>
 </body>
 </html>

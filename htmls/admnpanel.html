@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <label for="find user"></label>
+  <input type="text" placeholder="Name of the User">
+  <input type="submit" value="Find">
+    <table>
+        <thead>
+          <tr>
+            <th scope="col" >Usernme</th>
+            <th scope="col">Name of the User</th>
+            <th scope="col">Email</th>
+            <th scope="col">Select</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Don&#8217;t Make Me Think by Steve Krug</td>
+            <td>In Stock</td>
+            <td>1</td>
+            <th scope="col"> <input type="radio" name="select"> </th>
+
+          </tr>
+          <tr>
+            <td>A Project Guide to UX Design by Russ Unger &#38; Carolyn Chandler</td>
+            <td>In Stock</td>
+            <td>2</td>
+            <th scope="col"> <input type="radio" name="select"> </th>
+
+          </tr>
+          <tr>
+            <td>Introducing HTML5 by Bruce Lawson &#38; Remy Sharp</td>
+            <td>Out of Stock</td>
+            <td>1</td>
+            <th scope="col"> <input type="radio" name="select"> </th>
+          </tr>
+          <tr>
+            <td>Bulletproof Web Design by Dan Cederholm</td>
+            <td>In Stock</td>
+            <td>1</td>
+            <th scope="col"> <input type="radio" name="select"> </th>
+
+
+          </tr>
+        </tbody>
+      </table>
+      <input type="button" value="Back" onclick="history.go(-1)">
+      <input type="button" value="Modify">
+      <input type="button" value="Delete">
+
+    
+      <style>
+          table {
+  border-collapse: collapse;
+}
+th,
+td {
+  border: 1px solid #c6c7cc;
+  padding: 10px 15px;
+}
+th {
+  font-weight: bold;
+}
+      </style>
+</body>
+</html>

@@ -6,13 +6,15 @@ import (
 	"github.com/go-arun/adminpanel/modules/database"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
-//User ... to store users details from database 
-// type User struct {
-//     Name,Email,Pwd,Usrnm string
-//     IsAdmn bool
-// }
-var loggedUserDetail database.User
+
+var loggedUserDetail database.User // to Get values from DB
+type values struct {
+	Name,AdmnButonVisibility string
+}
+//HomePageValues ... To pass values to Home Page 
+var HomePageValues values
 
 var usrName,usrPwd string 
 //LoginPageGet ...
@@ -43,21 +45,28 @@ func HomepagePost(c *gin.Context){
 	}
 	var usrExists bool
 	usrExists,loggedUserDetail = database.UserValidaiton(usrName,usrPwd)
-	fmt.Println("loggedUserDetail-->",loggedUserDetail.Name,usrExists)
-	// if (!usrExists){ // Login Error
-	// 	c.HTML(
-	// 		http.StatusOK,
-	// 		"login_err.html",
-	// 		gin.H{"title": "User Login"},
-	// 	)
-	// }else{ //Login Success
-	// 	val := "Okay"
-	// 	c.HTML(
-	// 		http.StatusOK,
-	// 		"home.html",
-	// 		val,
-	// 	)
-	// }
+	//fmt.Println("loggedUserDetail-->",loggedUserDetail.Name,usrExists)
+	if (!usrExists){ // Login Error
+		c.HTML(
+			http.StatusOK,
+			"login_err.html",
+			gin.H{"title": "User Login"},
+		)
+	}else{ //Login Success
+		HomePageValues.Name = strings.ToUpper(loggedUserDetail.Name)
+		isAdmin := loggedUserDetail.IsAdmn
+		if (isAdmin){
+			HomePageValues.AdmnButonVisibility = "visible"
+		}else {
+			HomePageValues.AdmnButonVisibility = "hidden"
+		}
+		 
+		c.HTML(
+			http.StatusOK,
+			"home.html",
+			HomePageValues,
+		)
+	}
  }
   //SignupGet ...
 func SignupGet( c *gin.Context){
@@ -82,6 +91,15 @@ func SignupPost(c *gin.Context){
 	// }
 
 }
+//AdmnpanelGet ...
+func AdmnpanelGet(c *gin.Context){
+	c.HTML(
+		http.StatusOK,
+		"admnpanel.html",
+		gin.H{"title": "Admin Panel"},
+	)
+
+}
 func main(){
 	//database.InsertRec("Arun","ar@ar2.com","kumarcok1","pwd2",true)
 	router := gin.Default()
@@ -92,6 +110,7 @@ func main(){
 	router.POST("/home",HomepagePost)
 	router.GET("/signup",SignupGet)
 	router.POST("/signup",SignupPost)
+	router.GET("/admnpanel",AdmnpanelGet)
 
 
      router.Run()

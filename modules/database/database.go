@@ -27,7 +27,7 @@ var ClientOptions *options.ClientOptions
 //UserValidaiton in LoginPage
 func UserValidaiton(uname,pwd string)(bool){
     var result User
-    filter := bson.M{"name" : uname,"pwd" : pwd}
+    filter := bson.M{"usrnm" : uname,"pwd" : pwd}
     
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {

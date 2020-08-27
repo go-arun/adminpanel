@@ -19,34 +19,14 @@
           </tr>
         </thead>
         <tbody>
+          {{ range . }}
           <tr>
-            <td>Don&#8217;t Make Me Think by Steve Krug</td>
-            <td>In Stock</td>
-            <td>1</td>
-            <th scope="col"> <input type="radio" name="select"> </th>
-
+            <td> {{ .Usrnm }}</td>
+            <td>{{ .Name }}</td>
+            <td> {{ .Email }}</td>
+            <th scope="col"> <input value="{{ .Usrnm }}" type="radio" name="select"> </th>
           </tr>
-          <tr>
-            <td>A Project Guide to UX Design by Russ Unger &#38; Carolyn Chandler</td>
-            <td>In Stock</td>
-            <td>2</td>
-            <th scope="col"> <input type="radio" name="select"> </th>
-
-          </tr>
-          <tr>
-            <td>Introducing HTML5 by Bruce Lawson &#38; Remy Sharp</td>
-            <td>Out of Stock</td>
-            <td>1</td>
-            <th scope="col"> <input type="radio" name="select"> </th>
-          </tr>
-          <tr>
-            <td>Bulletproof Web Design by Dan Cederholm</td>
-            <td>In Stock</td>
-            <td>1</td>
-            <th scope="col"> <input type="radio" name="select"> </th>
-
-
-          </tr>
+          {{ end }}
         </tbody>
       </table>
       <input type="button" value="Back" onclick="history.go(-1)">

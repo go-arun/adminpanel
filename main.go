@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var loggedUserDetail database.User // to Get values from DB
+var LoggedUserDetail database.User // to Get values from DB
 type values struct {
 	Name,AdmnButonVisibility string
 }
@@ -44,8 +44,8 @@ func HomepagePost(c *gin.Context){
 		}
 	}
 	var usrExists bool
-	usrExists,loggedUserDetail = database.UserValidaiton(usrName,usrPwd)
-	//fmt.Println("loggedUserDetail-->",loggedUserDetail.Name,usrExists)
+	usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
+	//fmt.Println("LoggedUserDetail-->",LoggedUserDetail.Name,usrExists)
 	if (!usrExists){ // Login Error
 		c.HTML(
 			http.StatusOK,
@@ -53,9 +53,9 @@ func HomepagePost(c *gin.Context){
 			gin.H{"title": "User Login"},
 		)
 	}else{ //Login Success
-		HomePageValues.Name = strings.ToUpper(loggedUserDetail.Name)
-		isAdmin := loggedUserDetail.IsAdmn
-		if (isAdmin){
+		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+		isAdmin := LoggedUserDetail.IsAdmn
+		if (isAdmin){ // if admin make admin button visible
 			HomePageValues.AdmnButonVisibility = "visible"
 		}else {
 			HomePageValues.AdmnButonVisibility = "hidden"
@@ -68,6 +68,16 @@ func HomepagePost(c *gin.Context){
 		)
 	}
  }
+ //AdmnpanelPost ...
+func AdmnpanelPost(c *gin.Context){
+	c.HTML(
+		http.StatusOK,
+		"admnpanel.html",
+		gin.H{"title": "Admin Panel"},
+	)
+
+}
+
   //SignupGet ...
 func SignupGet( c *gin.Context){
 	c.HTML(
@@ -93,13 +103,15 @@ func SignupPost(c *gin.Context){
 }
 //AdmnpanelGet ...
 func AdmnpanelGet(c *gin.Context){
+	fmt.Println("OKOKOKOK",LoggedUserDetail.Usrnm)
 	c.HTML(
 		http.StatusOK,
-		"admnpanel.html",
-		gin.H{"title": "Admin Panel"},
-	)
+		"admnpanel.html",gin.H{
+		"LoggedUserDetail": LoggedUserDetail,
+})
 
 }
+
 func main(){
 	//database.InsertRec("Arun","ar@ar2.com","kumarcok1","pwd2",true)
 	router := gin.Default()
@@ -111,6 +123,7 @@ func main(){
 	router.GET("/signup",SignupGet)
 	router.POST("/signup",SignupPost)
 	router.GET("/admnpanel",AdmnpanelGet)
+	router.POST("/admnpanel",AdmnpanelPost)
 
 
      router.Run()

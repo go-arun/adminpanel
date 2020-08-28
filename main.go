@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"strings"
 )
-
+//LoggedUserDetail .. to store details of users 
 var LoggedUserDetail database.User // to Get values from DB
+var zeroLoggedUserDetail database.User // to make above strcut empty sometimes 
+
 type values struct {
 	Name,AdmnButonVisibility string
 }
@@ -69,12 +71,30 @@ func HomepagePost(c *gin.Context){
 	}
  }
  //AdmnpanelPost ...
-func AdmnpanelPost(c *gin.Context){
+ func AdmnpanelPost(c *gin.Context){
+	c.Request.ParseForm()
+
+	fmt.Println("Actiio->",c.Request.PostForm["action"][0])
+	operation :=  c.Request.PostForm["action"][0] 
+	
+	switch operation{ // based on action value
+
+	case "find":
+		fmt.Println("Inside Fine")
+		searchKey := c.Request.PostForm["searchkey"][0] // Value in Find textbox
+		_,LoggedUserDetail = database.GetUsers(searchKey)
+	case "del":
+		database.DelUser(c.Request.PostForm["select"][0]) // uname of selected one 
+		LoggedUserDetail = zeroLoggedUserDetail // if not made th
+	
+	}
+	
+	
 	c.HTML(
 		http.StatusOK,
-		"admnpanel.html",
-		gin.H{"title": "Admin Panel"},
-	)
+		"admnpanel.html",gin.H{
+		"LoggedUserDetail": LoggedUserDetail,
+})
 
 }
 

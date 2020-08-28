@@ -21,12 +21,12 @@
           </tr>
         </thead>
         <tbody>
-          {{ range . }}
+          {{ range .CollectedUserDetail }}
           <tr>
-            <td> {{ .Usrnm }}</td>
-            <td>{{ .Name }}</td>
-            <td> {{ .Email }}</td>
-            <th scope="col"> <input value="{{ .Usrnm }}" type="radio" name="select"> </th>
+            <td> {{ .usrnm }}</td>
+            <td>{{ .name }}</td>
+            <td> {{ .email }}</td>
+            <th scope="col"> <input value="{{ .usrnm }}" type="radio" name="select"> </th>
           </tr>
           {{ end }}
         </tbody>

@@ -7,7 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+	"go.mongodb.org/mongo-driver/bson"
 )
+
+
 //LoggedUserDetail .. to store details of users 
 var LoggedUserDetail database.User // to Get values from DB
 var zeroLoggedUserDetail database.User // to make above strcut empty sometimes 
@@ -26,6 +29,8 @@ func LoginPageGet(c *gin.Context) {
 		"index_login.html",
 		gin.H{"title": "User Login"},
 	)
+
+	database.FindAllUsers("Arun")
 }
 //HomepagePost ...
 func HomepagePost(c *gin.Context){
@@ -73,6 +78,7 @@ func HomepagePost(c *gin.Context){
  //AdmnpanelPost ...
  func AdmnpanelPost(c *gin.Context){
 	c.Request.ParseForm()
+	var searchResults []bson.M
 
 	fmt.Println("Actiio->",c.Request.PostForm["action"][0])
 	operation :=  c.Request.PostForm["action"][0] 
@@ -80,21 +86,20 @@ func HomepagePost(c *gin.Context){
 	switch operation{ // based on action value
 
 	case "find":
-		fmt.Println("Inside Fine")
+		
 		searchKey := c.Request.PostForm["searchkey"][0] // Value in Find textbox
-		_,LoggedUserDetail = database.GetUsers(searchKey)
+		// _,LoggedUserDetail = database.GetUsers(searchKey)
+		searchResults = database.FindAllUsers(searchKey)
 	case "del":
+		fmt.Println("selcted to del ->",c.Request.PostForm["select"][0])
 		database.DelUser(c.Request.PostForm["select"][0]) // uname of selected one 
 		LoggedUserDetail = zeroLoggedUserDetail // if not made th
-	
 	}
-	
-	
 	c.HTML(
 		http.StatusOK,
 		"admnpanel.html",gin.H{
-		"LoggedUserDetail": LoggedUserDetail,
-})
+		"CollectedUserDetail": searchResults,
+	})
 
 }
 

@@ -9,16 +9,26 @@
 </head>
 
 <body>
-    <form action="/" method="POST">
+    <form action="/" method="POST" onsubmit="return verify_inputs()">
     <div class="container" >
-        <input name="usrname" type="text" placeholder="Username"><br>
-        <input name="passwd" type="password" style="margin-top: 5px;" placeholder="Password"><br>
+        <input id="uname" name="usrname" type="text" placeholder="Username"><br>
+        <input id="pwd" name="passwd" type="password" style="margin-top: 5px;" placeholder="Password"><br>
         <a href="http://172.17.12.73:8080/signup" class="button">Create New User</a>
         <input type="submit" value="Login" style="margin-top: 10px; margin-left: 10px;">
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+    function  verify_inputs(){
+	    var uname = document.getElementById("uname").value;
+	    var pwd = document.getElementById("pwd").value;
+        if (uname=="" || pwd ==""){
+            alert("Please make sure Username and Password Provided !!")
+            return false
+        }
+    }
+</script>
 </form>
 </body>
 </html>

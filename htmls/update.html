@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="/update" method="POST">
+    <form action="/update" method="POST" onsubmit="return verify_inputs()" >
 <div>
     {{ range . }}
     <input name="username" value="{{ .Usrnm }}" placeholder="UserName" type="text" disabled="disabled"><br>
@@ -20,6 +20,16 @@
     
 </div>
 
+<script>
+    function  verify_inputs(){
+	    var uname = document.getElementById("uname").value;
+	    var pwd = document.getElementById("pwd").value;
+        if (uname=="" || pwd ==""){
+            alert("Please make sure Username and Password Provided !!")
+            return false
+        }
+    }
+</script>
 </form>
 
 </body>

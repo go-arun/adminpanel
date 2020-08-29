@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-  <form id="admnForm" method="POST" action="/admnpanel">
+  <form id="admnForm" method="POST" action="/admnpanel" >
   <label  for="find user"></label>
   <input name="searchkey" type="text" placeholder="Name of the User">
   <input id="find" onclick="submitWithActionVal(this.id)" type="submit" value="Find" >
@@ -26,7 +26,7 @@
             <td> {{ .usrnm }}</td>
             <td>{{ .name }}</td>
             <td> {{ .email }}</td>
-            <th scope="col"> <input value="{{ .usrnm }}" type="radio" name="select"> </th>
+            <th scope="col"> <input  value= "{{ .usrnm }}" type="radio" name="select" checked="checked"> </th>
           </tr>
           {{ end }}
         </tbody>
@@ -35,7 +35,7 @@
       <input id="modi" onclick="submitWithActionVal(this.id)" type="button" value="Modify">
       <input id="del" onclick="submitWithActionVal(this.id)" type="button" value="Delete">
     </form>
-    
+       
       <style>
           table {
   border-collapse: collapse;

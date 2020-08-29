@@ -23,33 +23,27 @@ var HomePageValues values
 var usrName,usrPwd string 
 //LoginPageGet ...
 func LoginPageGet(c *gin.Context) {
-	isLoggedIN,_ := c.Cookie ("sid_cookie")
-	if ( isLoggedIN != "" ){ // User not yet logged out so ,redirect to home page
-		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
-		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
-		isAdmin := LoggedUserDetail.IsAdmn
-		if (isAdmin){ // if admin make admin button visible
-			HomePageValues.AdmnButonVisibility = "visible"
-		}else {
-			HomePageValues.AdmnButonVisibility = "hidden"
-		}
+	sessionCookie,_ := c.Cookie ("sid_cookie")
+	if ( sessionCookie != "" ){
+		HomePageValues = getHomePage(sessionCookie) // Home page of user who not loged out 
 		c.HTML(
 			http.StatusOK,
 			"home.html",
 			HomePageValues,
 		)
 	}else{
-	c.HTML(
-		http.StatusOK,
-		"index_login.html",
-		gin.H{"title": "User Login"},
-	)
+		c.HTML(
+			http.StatusOK,
+			"index_login.html",
+			gin.H{"title": "User Login"},
+		)
 	}
 }
+
 //HomepagePost ...
 
   //LoginPagePost for Web
- func LoginPagePost(c *gin.Context)  {
+ func LoginPagePost(c *gin.Context){
 	c.Request.ParseForm()
 	for key, value := range c.Request.PostForm {
 		fmt.Println(key,value)
@@ -63,6 +57,7 @@ func LoginPageGet(c *gin.Context) {
 	usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
 
 	if (!usrExists){ // Login Error
+		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
 		c.HTML(
 			http.StatusOK,
 			"login_err.html",
@@ -85,7 +80,8 @@ func LoginPageGet(c *gin.Context) {
 		}else {
 			HomePageValues.AdmnButonVisibility = "hidden"
 		}
-		 
+		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
 		c.HTML(
 			http.StatusOK,
 			"home.html",
@@ -97,6 +93,8 @@ func LoginPageGet(c *gin.Context) {
  func AdmnpanelPost(c *gin.Context){
 	c.Request.ParseForm()
 	var searchResults []bson.M
+	searchKey := c.Request.PostForm["searchkey"][0];  // searchKey is userName
+	
 
 	fmt.Println("Actiio->",c.Request.PostForm["action"][0])
 	operation :=  c.Request.PostForm["action"][0] 
@@ -115,7 +113,7 @@ func LoginPageGet(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/update")
 		c.Abort()
 	}
-
+	if (searchKey !=""){   // Contine HEERE ER ER R R 
 	if (operation != "modi"){ // if it is modification code is redirected to update page, so this lines need to be skipped
 		c.HTML(
 			http.StatusOK,
@@ -124,15 +122,34 @@ func LoginPageGet(c *gin.Context) {
 		})
 	}	
 
+	}
+
 }
 
   //SignupGet ...
 func SignupGet( c *gin.Context){
-	c.HTML(
-		http.StatusOK,
-		"signup.html",
-		gin.H{"title": "User Login"},
-	)
+	isLoggedIN,_ := c.Cookie ("sid_cookie")
+	if ( isLoggedIN != "" ){ // If user is loged in then no need to show sign-in page ( while click on back)
+		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
+		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+		isAdmin := LoggedUserDetail.IsAdmn
+		if (isAdmin){ // if admin make admin button visible
+			HomePageValues.AdmnButonVisibility = "visible"
+		}else {
+			HomePageValues.AdmnButonVisibility = "hidden"
+		}
+		c.HTML(
+			http.StatusOK,
+			"home.html",
+			HomePageValues,
+		)
+	}else{
+		c.HTML(
+			http.StatusOK,
+			"signup.html",
+			gin.H{"title": "User Login"},
+		)
+	}
 
 }
 //SignupPost ...
@@ -147,6 +164,12 @@ func SignupPost(c *gin.Context){
 		fmt.Println(name,username,email,passwd1,passwd2)
 		database.InsertRec(name,email,username,passwd1,false)
 	// }
+
+	c.HTML( // after addding new user direct to login page
+		http.StatusOK,
+		"index_login.html",
+		gin.H{"title": "User Login"},
+	)
 
 }
 //AdmnpanelGet ...
@@ -197,6 +220,21 @@ func HomepagePost(c *gin.Context){
 	"/",
 	"",false,false,
 	)
+}
+
+
+
+func getHomePage(sessionCookie string)(HomePageValues values) { //if logged in then cancell all other operatins and loading home page
+		_,LoggedUserDetail = database.TraceUserWithSID(sessionCookie)
+		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+		isAdmin := LoggedUserDetail.IsAdmn
+		if (isAdmin){ // if admin make admin button visible
+			HomePageValues.AdmnButonVisibility = "visible"
+		}else {
+			HomePageValues.AdmnButonVisibility = "hidden"
+		}
+
+		return HomePageValues // Details of user to show in Home Page
 }
 
 func main(){

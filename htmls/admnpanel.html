@@ -9,9 +9,9 @@
   <form id="admnForm" method="POST" action="/admnpanel" >
   <label  for="find user"></label>
   <input name="searchkey" type="text" placeholder="Name of the User">
-  <input id="find" onclick="submitWithActionVal(this.id)" type="submit" value="Find" >
+  <input id="find" onclick="submitWithActionVal(this.id)" type="submit" value="Search" >
   <input id="optedto" name='action' style="visibility:hidden"  value="10">  <!-- to pass which button is pressed-->
-    <table>
+    <table id="users_tble">
         <thead>
           <tr>
             <th scope="col" >Usernme</th>
@@ -34,6 +34,7 @@
       <input type="button" value="Back" onclick="history.go(-1)">
       <input id="modi" onclick="submitWithActionVal(this.id)" type="button" value="Modify">
       <input id="del" onclick="submitWithActionVal(this.id)" type="button" value="Delete">
+      <input id="logout" onclick="submitWithActionVal(this.id)" type="button" value="Logout">
     </form>
        
       <style>
@@ -51,6 +52,12 @@ th {
       </style>
       <script>
         function submitWithActionVal(clicked_id){
+          var rowCount = document.getElementById("users_tble").rows.length;
+          // alert ( rowCount)
+          if (rowCount == 1 && clicked_id != "find" && clicked_id != "logout"){
+            alert("First Do a Search and Select one User to Proceed!!")
+            return
+          }
           document.getElementById("optedto").value = clicked_id
           document.getElementById("admnForm").submit()
         }

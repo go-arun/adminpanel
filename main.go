@@ -93,7 +93,7 @@ func LoginPageGet(c *gin.Context) {
  func AdmnpanelPost(c *gin.Context){
 	c.Request.ParseForm()
 	var searchResults []bson.M
-	searchKey := c.Request.PostForm["searchkey"][0];  // searchKey is userName
+//	searchKey := c.Request.PostForm["searchkey"][0];  // searchKey is userName
 	
 
 	fmt.Println("Actiio->",c.Request.PostForm["action"][0])
@@ -112,17 +112,26 @@ func LoginPageGet(c *gin.Context) {
 		username = c.Request.PostForm["select"][0]
 		c.Redirect(http.StatusMovedPermanently, "/update")
 		c.Abort()
+	case "logout":
+		sidFromBrwser,_ := c.Cookie ("sid_cookie")
+		database.RemoveSessionID(sidFromBrwser)
+		c.Redirect(http.StatusMovedPermanently, "/") // redirecting to loging page
+		c.Abort()
+		c.SetCookie("sid_cookie", // Deleting cookie
+		"",
+		-1, // delete now !!
+		"/",
+		"",false,false,
+		)
 	}
-	if (searchKey !=""){   // Contine HEERE ER ER R R 
-	if (operation != "modi"){ // if it is modification code is redirected to update page, so this lines need to be skipped
-		c.HTML(
+	if (operation != "modi" && operation != "logout" ){ // redirection should happen if the operatiom 
+		c.HTML(											// is not for modification and Logout
 			http.StatusOK,
 			"admnpanel.html",gin.H{
 			"CollectedUserDetail": searchResults,
 		})
 	}	
 
-	}
 
 }
 
@@ -173,13 +182,34 @@ func SignupPost(c *gin.Context){
 
 }
 //AdmnpanelGet ...
-func AdmnpanelGet(c *gin.Context){
-	fmt.Println("OKOKOKOK",LoggedUserDetail.Usrnm)
-	c.HTML(
-		http.StatusOK,
-		"admnpanel.html",gin.H{
-		"LoggedUserDetail": LoggedUserDetail,
-	})
+func AdmnpanelGet(c *gin.Context){ 
+		isLoggedIN,_ := c.Cookie ("sid_cookie")
+	if (isLoggedIN != "" ){ // show admin page only if session active for an admin user
+		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
+		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+		isAdmin := LoggedUserDetail.IsAdmn
+		if (isAdmin){
+			c.HTML( //He is admin..
+				http.StatusOK,
+				"admnpanel.html",gin.H{
+				"LoggedUserDetail": LoggedUserDetail,
+			})
+
+		}else{ // This is normal user, direct to home page
+			c.HTML(
+				http.StatusOK,
+				"home.html",
+				HomePageValues,
+			)
+		}
+
+	}else{
+		c.HTML( // No active session so directing to login page
+			http.StatusOK,
+			"index_login.html",
+			gin.H{"title": "User Login"},
+		)
+	}
 }
 //UpdateGet ... 
 func UpdateGet(c *gin.Context){
@@ -223,8 +253,8 @@ func HomepagePost(c *gin.Context){
 }
 
 
-
-func getHomePage(sessionCookie string)(HomePageValues values) { //if logged in then cancell all other operatins and loading home page
+// To Load homme page , if user is already logged in
+func getHomePage(sessionCookie string)(HomePageValues values) { 
 		_,LoggedUserDetail = database.TraceUserWithSID(sessionCookie)
 		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
 		isAdmin := LoggedUserDetail.IsAdmn

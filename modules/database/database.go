@@ -90,11 +90,7 @@ func FindAllUsers(name string)([]bson.M){
     }
     filter := bson.D{{"name", primitive.Regex{Pattern: name}}}
     Collection := client.Database("admnpanel").Collection("users")
-
-    // find all documents in which the "name" field is "Bob"
-    // specify the Sort option to sort the returned documents by age in ascending order
-    // opts := options.Find().SetSort(bson.D{{"age", 1}})
-    // cursor, err := Collection.Find(context.TODO(), bson.D{{"name", "/^" + name + "/"}})
+  
     cursor, err := Collection.Find(context.TODO(), filter)
     if err != nil {
         log.Fatal(err)
@@ -230,3 +226,5 @@ func generateNewUUID() (string, error) {
 	uuid[6] = uuid[6]&^0xf0 | 0x40
 	return fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:]), nil
 }
+
+

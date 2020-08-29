@@ -27,6 +27,26 @@ var Collection *mongo.Collection
 
 var ClientOptions *options.ClientOptions
 
+//RemoveSessionID ... 
+func RemoveSessionID(sid string) {
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    client, err := mongo.Connect(context.TODO(), ClientOptions)
+    if err != nil {
+        log.Fatal(err)
+    }
+    Collection := client.Database("admnpanel").Collection("users")
+    filter := bson.D{{"sess_id", sid}}
+        update := bson.D{{"$set", bson.D{
+            {"sess_id", ""},// Made it empty
+        }}}
+    
+	updateResult, err := Collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println("SessID Removed-",updateResult)
+}
+
 //AddSessionID ... 
 func AddSessionID(usrName string)(string) {
     sessID,_ := generateNewUUID()
@@ -47,8 +67,6 @@ func AddSessionID(usrName string)(string) {
     }
     fmt.Println("SessID Added-",updateResult)
     return sessID
-    
-
 }
 
 //DelUser .. 
@@ -113,8 +131,23 @@ func GetUser(usrName string)(bool,User){
     fmt.Printf("Found a single document: %+v\n", result)
     return true,result // yes mach/es found
 }
-
-
+//TraceUserWithSID ... 
+func TraceUserWithSID(receivedCookie string)(bool,User){
+    var result User
+    filter := bson.M{"sess_id" : receivedCookie }
+    
+    client, err := mongo.Connect(context.TODO(), ClientOptions)
+    if err != nil {
+        log.Fatal(err)
+    }
+    Collection := client.Database("admnpanel").Collection("users")
+    err = Collection.FindOne(context.TODO(), filter).Decode(&result)
+    if err != nil {
+         return false,result // no rec found with this sec-id
+    }
+    fmt.Printf("Found a single document: %+v\n", result)
+    return true,result // found one 
+}
 //UserValidaiton in LoginPage
 func UserValidaiton(uname,pwd string)(bool,User){
     var result User

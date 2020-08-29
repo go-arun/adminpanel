@@ -23,26 +23,37 @@ var HomePageValues values
 var usrName,usrPwd string 
 //LoginPageGet ...
 func LoginPageGet(c *gin.Context) {
+	isLoggedIN,_ := c.Cookie ("sid_cookie")
+	if ( isLoggedIN != "" ){ // User not yet logged out so ,redirect to home page
+		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
+		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+		isAdmin := LoggedUserDetail.IsAdmn
+		if (isAdmin){ // if admin make admin button visible
+			HomePageValues.AdmnButonVisibility = "visible"
+		}else {
+			HomePageValues.AdmnButonVisibility = "hidden"
+		}
+		c.HTML(
+			http.StatusOK,
+			"home.html",
+			HomePageValues,
+		)
+	}else{
 	c.HTML(
 		http.StatusOK,
 		"index_login.html",
 		gin.H{"title": "User Login"},
 	)
-
-	database.FindAllUsers("Arun")
+	}
 }
 //HomepagePost ...
-func HomepagePost(c *gin.Context){
-
-	fmt.Println("sdsdsdsds")
-}
 
   //LoginPagePost for Web
  func LoginPagePost(c *gin.Context)  {
 	c.Request.ParseForm()
 	for key, value := range c.Request.PostForm {
 		fmt.Println(key,value)
-		if (key == "usrname") {
+		if (key == "usrname") { // getting value from form
 			usrName = value[0]
 		}else{
 			usrPwd = value[0]
@@ -50,7 +61,7 @@ func HomepagePost(c *gin.Context){
 	}
 	var usrExists bool
 	usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
-	//fmt.Println("LoggedUserDetail-->",LoggedUserDetail.Name,usrExists)
+
 	if (!usrExists){ // Login Error
 		c.HTML(
 			http.StatusOK,
@@ -165,7 +176,27 @@ func UpdatePost(c *gin.Context){
 		email := c.Request.PostForm["email"][0]
 		passwd1 := c.Request.PostForm["pwd1"][0]
 		database.UpdateRec(name,email,username,passwd1,false)
-	// }
+		
+		c.HTML( // after updation loading admin page
+			http.StatusOK,
+			"admnpanel.html",gin.H{
+			"LoggedUserDetail": LoggedUserDetail,
+		})
+}
+//HomepagePost ...
+func HomepagePost(c *gin.Context){
+	//Handling Log Out
+	sidFromBrwser,_ := c.Cookie ("sid_cookie")
+	database.RemoveSessionID(sidFromBrwser)
+	c.Redirect(http.StatusMovedPermanently, "/") // redirecting to loging page
+	c.Abort()
+	fmt.Println(" Home Page post triggered !!")
+	c.SetCookie("sid_cookie", // Deleting cookie
+	"",
+	-1, // delete now !!
+	"/",
+	"",false,false,
+	)
 }
 
 func main(){

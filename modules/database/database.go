@@ -4,10 +4,12 @@ import (
     "context"
     "fmt"
     "log"
-   "go.mongodb.org/mongo-driver/bson"
-   "go.mongodb.org/mongo-driver/bson/primitive"
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/bson/primitive"
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
+    "crypto/rand"
+	"io"
 )
 
 //User ...
@@ -24,6 +26,30 @@ type Credentials struct{
 var Collection *mongo.Collection
 
 var ClientOptions *options.ClientOptions
+
+//AddSessionID ... 
+func AddSessionID(usrName string)(string) {
+    sessID,_ := generateNewUUID()
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    client, err := mongo.Connect(context.TODO(), ClientOptions)
+    if err != nil {
+        log.Fatal(err)
+    }
+    Collection := client.Database("admnpanel").Collection("users")
+    filter := bson.D{{"usrnm", usrName}}
+        update := bson.D{{"$set", bson.D{
+            {"sess_id", sessID},//UUID
+        }}}
+    
+	updateResult, err := Collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println("SessID Added-",updateResult)
+    return sessID
+    
+
+}
 
 //DelUser .. 
 func DelUser(uname string){
@@ -69,12 +95,10 @@ func FindAllUsers(name string)([]bson.M){
     return results
 }
 
-//GetUsers ... to get users based on search criteria
-func GetUsers(name string)(bool,User){
+//GetUser ... to get user , to pick only one , used while updating only
+func GetUser(usrName string)(bool,User){
     var result User
-    // name = "/^" + name + "/"
-    // fmt.Println ( "uname modified to ->",name)
-    filter := bson.M{"name" : name}
+    filter := bson.M{"usrnm" : usrName}
     
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
@@ -84,8 +108,7 @@ func GetUsers(name string)(bool,User){
     err = Collection.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil {
          return false,result // no such user 
-    fmt.Println("No Match Found !!!")
-
+         fmt.Println("No Match Found !!!")
     }
     fmt.Printf("Found a single document: %+v\n", result)
     return true,result // yes mach/es found
@@ -131,4 +154,46 @@ func InsertRec(name,email,usrName,pwd string,adminStatus bool){
     	log.Fatal(err)
     }
 fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+}
+
+//UpdateRec to insert into database
+func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    client, err := mongo.Connect(context.TODO(), ClientOptions)
+    if err != nil {
+        log.Fatal(err)
+    }
+    Collection := client.Database("admnpanel").Collection("users")
+    //var usr User
+    // usr.Name = name
+    // usr.Usrnm = usrName
+    // usr.Email = email
+    // usr.Pwd = pwd 
+    // usr.IsAdmn = adminStatus
+
+    filter := bson.D{{"usrnm", usrName}}
+        update := bson.D{{"$set", bson.D{
+            {"email", email},
+            {"name",name},
+            {"pwd",pwd},
+        }}}
+    
+	updateResult, err := Collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+    	log.Fatal(err)
+    }
+fmt.Println("Inserted a single document: ", updateResult.UpsertedCount)
+}
+
+func generateNewUUID() (string, error) {
+	uuid := make([]byte, 16)
+	n, err := io.ReadFull(rand.Reader, uuid)
+	if n != len(uuid) || err != nil {
+		return "", err
+	}
+	// variant bits; see section 4.1.1
+	uuid[8] = uuid[8]&^0xc0 | 0x80
+	// version 4 (pseudo-random); see section 4.1.3
+	uuid[6] = uuid[6]&^0xf0 | 0x40
+	return fmt.Sprintf("%x-%x-%x-%x-%x", uuid[0:4], uuid[4:6], uuid[6:8], uuid[8:10], uuid[10:]), nil
 }

@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"fmt"
 	"github.com/go-arun/adminpanel/modules/database"
@@ -10,10 +9,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-
 //LoggedUserDetail .. to store details of users 
 var LoggedUserDetail database.User // to Get values from DB
 var zeroLoggedUserDetail database.User // to make above strcut empty sometimes 
+var username string // is usfull while moving to update page , to store username before redirecting 
 
 type values struct {
 	Name,AdmnButonVisibility string
@@ -38,7 +37,6 @@ func HomepagePost(c *gin.Context){
 	fmt.Println("sdsdsdsds")
 }
 
-
   //LoginPagePost for Web
  func LoginPagePost(c *gin.Context)  {
 	c.Request.ParseForm()
@@ -60,6 +58,15 @@ func HomepagePost(c *gin.Context){
 			gin.H{"title": "User Login"},
 		)
 	}else{ //Login Success
+		//generating session ID using UUID 
+		sessionID := database.AddSessionID(usrName) 
+		c.SetCookie("sid_cookie",
+		sessionID,
+		3600*12, // 12hrs
+		"/",
+		"",false,false, //domain excluded 
+		)
+		//c.SetCookie("cookieName", "testCookie", 100000, "/", "", false, false)
 		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
 		isAdmin := LoggedUserDetail.IsAdmn
 		if (isAdmin){ // if admin make admin button visible
@@ -84,9 +91,7 @@ func HomepagePost(c *gin.Context){
 	operation :=  c.Request.PostForm["action"][0] 
 	
 	switch operation{ // based on action value
-
 	case "find":
-		
 		searchKey := c.Request.PostForm["searchkey"][0] // Value in Find textbox
 		// _,LoggedUserDetail = database.GetUsers(searchKey)
 		searchResults = database.FindAllUsers(searchKey)
@@ -94,12 +99,19 @@ func HomepagePost(c *gin.Context){
 		fmt.Println("selcted to del ->",c.Request.PostForm["select"][0])
 		database.DelUser(c.Request.PostForm["select"][0]) // uname of selected one 
 		LoggedUserDetail = zeroLoggedUserDetail // if not made th
+	case "modi":
+		username = c.Request.PostForm["select"][0]
+		c.Redirect(http.StatusMovedPermanently, "/update")
+		c.Abort()
 	}
-	c.HTML(
-		http.StatusOK,
-		"admnpanel.html",gin.H{
-		"CollectedUserDetail": searchResults,
-	})
+
+	if (operation != "modi"){ // if it is modification code is redirected to update page, so this lines need to be skipped
+		c.HTML(
+			http.StatusOK,
+			"admnpanel.html",gin.H{
+			"CollectedUserDetail": searchResults,
+		})
+	}	
 
 }
 
@@ -133,8 +145,27 @@ func AdmnpanelGet(c *gin.Context){
 		http.StatusOK,
 		"admnpanel.html",gin.H{
 		"LoggedUserDetail": LoggedUserDetail,
-})
-
+	})
+}
+//UpdateGet ... 
+func UpdateGet(c *gin.Context){
+	_,LoggedUserDetail = database.GetUser(username)
+	c.HTML(
+		http.StatusOK,
+		"update.html",gin.H{
+		"CollectedUserDetail": LoggedUserDetail,
+	})
+}
+//UpdatePost ... 
+func UpdatePost(c *gin.Context){
+	c.Request.ParseForm()
+	// for key,value := range c.Request.PostForm{
+		name := c.Request.PostForm["name"][0]
+		// username := c.Request.PostForm["username"][0]
+		email := c.Request.PostForm["email"][0]
+		passwd1 := c.Request.PostForm["pwd1"][0]
+		database.UpdateRec(name,email,username,passwd1,false)
+	// }
 }
 
 func main(){
@@ -149,6 +180,8 @@ func main(){
 	router.POST("/signup",SignupPost)
 	router.GET("/admnpanel",AdmnpanelGet)
 	router.POST("/admnpanel",AdmnpanelPost)
+	router.GET("/update",UpdateGet)
+	router.POST("/update",UpdatePost)
 
 
      router.Run()

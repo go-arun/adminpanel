@@ -124,8 +124,10 @@ func LoginPageGet(c *gin.Context) {
 		"",false,false,
 		)
 	}
-	if (operation != "modi" && operation != "logout" ){ // redirection should happen if the operatiom 
-		c.HTML(											// is not for modification and Logout
+	if (operation != "modi" && operation != "logout" ){ // redirection should happen if the operatiom  is not for modification and Logout
+		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+		c.HTML(											
 			http.StatusOK,
 			"admnpanel.html",gin.H{
 			"CollectedUserDetail": searchResults,

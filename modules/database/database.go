@@ -30,7 +30,7 @@ var ClientOptions *options.ClientOptions
 
 //RemoveSessionID ... 
 func RemoveSessionID(sid string) {
-    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
@@ -51,7 +51,7 @@ func RemoveSessionID(sid string) {
 //AddSessionID ... 
 func AddSessionID(usrName string)(string) {
     sessID,_ := generateNewUUID()
-    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
@@ -163,14 +163,14 @@ func UserValidaiton(uname,pwd string)(bool,User){
     fmt.Printf("Found a single document: %+v\n", result)
     //User exists , so will check pwd with hash too 
     match := securepwd.CheckPasswordHash(pwd, result.Pwd) // will reutn true / false
-    fmt.Println("Password match result",match,pwd)
+    fmt.Println("-------------------------------------------->Password match result",match,pwd)
 
     return match,result // yes credetial exists 
 }
 
 //InsertRec to insert into database
 func InsertRec(name,email,usrName,pwd string,adminStatus bool){
-    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
@@ -192,7 +192,7 @@ fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 //UpdateRec to insert into database
 func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
-    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)

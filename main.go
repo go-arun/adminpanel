@@ -46,6 +46,7 @@ func LoginPageGet(c *gin.Context) {
 
   //LoginPagePost for Web
  func LoginPagePost(c *gin.Context){
+	fmt.Println("Login page Post ----------->")
 	isLoggedIN,_ := c.Cookie ("sid_cookie")
 	if ( isLoggedIN != "" ){ // If user is loged in then no need to show sign-in page ( while click on back)
 		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
@@ -64,7 +65,6 @@ func LoginPageGet(c *gin.Context) {
 	}else{
 		c.Request.ParseForm()
 		for key, value := range c.Request.PostForm {
-			fmt.Println(key,value)
 			if (key == "usrname") { // getting value from form
 				usrName = value[0]
 			}else{
@@ -117,7 +117,6 @@ func LoginPageGet(c *gin.Context) {
 //	searchKey := c.Request.PostForm["searchkey"][0];  // searchKey is userName
 	
 
-	fmt.Println("Actiio->",c.Request.PostForm["action"][0])
 	operation :=  c.Request.PostForm["action"][0] 
 	
 	switch operation{ // based on action value
@@ -126,7 +125,6 @@ func LoginPageGet(c *gin.Context) {
 		// _,LoggedUserDetail = database.GetUsers(searchKey)
 		searchResults = database.FindAllUsers(searchKey)
 	case "del":
-		fmt.Println("selcted to del ->",c.Request.PostForm["select"][0])
 		database.DelUser(c.Request.PostForm["select"][0]) // uname of selected one 
 		LoggedUserDetail = zeroLoggedUserDetail // if not made th
 	case "modi":
@@ -209,7 +207,6 @@ func SignupPost(c *gin.Context){
 			email := c.Request.PostForm["email"][0]
 			passwd1 := c.Request.PostForm["pwd1"][0]
 			passwd1,_ = securepwd.HashPassword(passwd1) //hashing
-			fmt.Println(name,username,email,passwd1)
 			database.InsertRec(name,email,username,passwd1,false)
 		// }
 		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
@@ -285,7 +282,6 @@ func HomepagePost(c *gin.Context){
 	database.RemoveSessionID(sidFromBrwser)
 	c.Redirect(http.StatusMovedPermanently, "/") // redirecting to loging page
 	c.Abort()
-	fmt.Println(" Home Page post triggered !!")
 	c.SetCookie("sid_cookie", // Deleting cookie
 	"",
 	-1, // delete now !!

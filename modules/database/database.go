@@ -148,6 +148,7 @@ func TraceUserWithSID(receivedCookie string)(bool,User){
 //UserValidaiton in LoginPage
 func UserValidaiton(uname,pwd string)(bool,User){
     var result User
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     
     filter := bson.M{"usrnm" : uname}
     

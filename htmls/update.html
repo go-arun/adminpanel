@@ -9,11 +9,11 @@
     <form action="/update" method="POST" onsubmit="return verify_inputs()" >
 <div>
     {{ range . }}
-    <input name="username" value="{{ .Usrnm }}" placeholder="UserName" type="text" disabled="disabled"><br>
-    <input name="name" value="{{ .Name }}" placeholder="Your Name" type="text"><br>
-    <input name="email" value="{{ .Email }}" placeholder="Email" type="text"><br>
-    <input name="pwd1" placeholder="Password" type="password"><br>
-    <input name="pwd2" placeholder="Re Type Password" type="password"><br>
+    <input id="uname" name="username" value="{{ .Usrnm }}" placeholder="UserName" type="text" disabled="disabled"><br>
+    <input id="name" name="name" value="{{ .Name }}" placeholder="Your Name" type="text"><br>
+    <input id="email" name="email" value="{{ .Email }}" placeholder="Email" type="text"><br>
+    <input id="pwd1" name="pwd1" placeholder="Password" type="password"><br>
+    <input id="pwd2" name="pwd2" placeholder="Re Type Password" type="password"><br>
     <input type="button" value="Back" onclick="history.go(-1)">
     <input type="submit" value="Update">
     {{ end }}
@@ -23,11 +23,26 @@
 <script>
     function  verify_inputs(){
 	    var uname = document.getElementById("uname").value;
-	    var pwd = document.getElementById("pwd").value;
-        if (uname=="" || pwd ==""){
-            alert("Please make sure Username and Password Provided !!")
+	    var name = document.getElementById("name").value;
+	    var email = document.getElementById("email").value;
+	    var pwd1 = document.getElementById("pwd1").value;
+	    var pwd2 = document.getElementById("pwd2").value;
+        if (uname=="" || name =="" || ){
+            alert("Username and Name Can't be empty !!")
             return false
         }
+        if (pwd1 != pwd2){
+            alert("Passwords Mismatching..Plesae Correct it !!")
+            return false
+        }
+        if( !validateEmail(email)) {
+                alert("Email Address is not valid");
+                return false;
+        }
+    }
+    function validateEmail($email) {
+        var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        return emailReg.test( $email );
     }
 </script>
 </form>

@@ -207,25 +207,30 @@ func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
         log.Fatal(err)
     }
     Collection := client.Database("admnpanel").Collection("users")
-    //var usr User
-    // usr.Name = name
-    // usr.Usrnm = usrName
-    // usr.Email = email
-    // usr.Pwd = pwd 
-    // usr.IsAdmn = adminStatus
 
     filter := bson.D{{"usrnm", usrName}}
+    if (pwd != ""){
         update := bson.D{{"$set", bson.D{
             {"email", email},
             {"name",name},
             {"pwd",pwd},
         }}}
-    
-	updateResult, err := Collection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-    	log.Fatal(err)
+        _, err := Collection.UpdateOne(context.TODO(), filter, update)
+        if err != nil {
+            log.Fatal(err)
+        }
+    }else{ // if passwd is empty means, keep it same
+        update := bson.D{{"$set", bson.D{
+            {"email", email},
+            {"name",name},
+        }}}
+        _, err := Collection.UpdateOne(context.TODO(), filter, update) //Update result ignored 
+        if err != nil {
+            log.Fatal(err)
+        }
+
     }
-fmt.Println("Inserted a single document: ", updateResult.UpsertedCount)
+
 }
 
 func generateNewUUID() (string, error) {

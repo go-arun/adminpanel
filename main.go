@@ -266,7 +266,9 @@ func UpdatePost(c *gin.Context){
 		// username := c.Request.PostForm["username"][0]
 		email := c.Request.PostForm["email"][0]
 		passwd1 := c.Request.PostForm["pwd1"][0]
-		passwd1,_ = securepwd.HashPassword(passwd1) //hashing
+		if (passwd1 != ""){ // Only if admin is changing pwd then only need to hash
+			passwd1,_ = securepwd.HashPassword(passwd1) //hashing
+		}
 		database.UpdateRec(name,email,username,passwd1,false)
 		
 		c.HTML( // after updation loading admin page

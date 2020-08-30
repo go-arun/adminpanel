@@ -44,35 +44,9 @@ func LoginPageGet(c *gin.Context) {
 
   //LoginPagePost for Web
  func LoginPagePost(c *gin.Context){
-	c.Request.ParseForm()
-	for key, value := range c.Request.PostForm {
-		fmt.Println(key,value)
-		if (key == "usrname") { // getting value from form
-			usrName = value[0]
-		}else{
-			usrPwd = value[0]
-		}
-	}
-	var usrExists bool
-	usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
-
-	if (!usrExists){ // Login Error
-		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
-		c.HTML(
-			http.StatusOK,
-			"login_err.html",
-			gin.H{"title": "User Login"},
-		)
-	}else{ //Login Success
-		//generating session ID using UUID 
-		sessionID := database.AddSessionID(usrName) 
-		c.SetCookie("sid_cookie",
-		sessionID,
-		3600*12, // 12hrs
-		"/",
-		"",false,false, //domain excluded 
-		)
-		//c.SetCookie("cookieName", "testCookie", 100000, "/", "", false, false)
+	isLoggedIN,_ := c.Cookie ("sid_cookie")
+	if ( isLoggedIN != "" ){ // If user is loged in then no need to show sign-in page ( while click on back)
+		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
 		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
 		isAdmin := LoggedUserDetail.IsAdmn
 		if (isAdmin){ // if admin make admin button visible
@@ -80,13 +54,57 @@ func LoginPageGet(c *gin.Context) {
 		}else {
 			HomePageValues.AdmnButonVisibility = "hidden"
 		}
-		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
-		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
 		c.HTML(
 			http.StatusOK,
 			"home.html",
 			HomePageValues,
 		)
+	}else{
+		c.Request.ParseForm()
+		for key, value := range c.Request.PostForm {
+			fmt.Println(key,value)
+			if (key == "usrname") { // getting value from form
+				usrName = value[0]
+			}else{
+				usrPwd = value[0]
+			}
+		}
+		var usrExists bool
+		usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
+
+		if (!usrExists){ // Login Error
+			c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+			c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+			c.HTML(
+				http.StatusOK,
+				"login_err.html",
+				gin.H{"title": "User Login"},
+			)
+		}else{ //Login Success
+			//generating session ID using UUID 
+			sessionID := database.AddSessionID(usrName) 
+			c.SetCookie("sid_cookie",
+			sessionID,
+			3600*12, // 12hrs
+			"/",
+			"",false,false, //domain excluded 
+			)
+			//c.SetCookie("cookieName", "testCookie", 100000, "/", "", false, false)
+			HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+			isAdmin := LoggedUserDetail.IsAdmn
+			if (isAdmin){ // if admin make admin button visible
+				HomePageValues.AdmnButonVisibility = "visible"
+			}else {
+				HomePageValues.AdmnButonVisibility = "hidden"
+			}
+			c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+			c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+			c.HTML(
+				http.StatusOK,
+				"home.html",
+				HomePageValues,
+			)
+		}
 	}
  }
  //AdmnpanelPost ...
@@ -165,22 +183,40 @@ func SignupGet( c *gin.Context){
 }
 //SignupPost ...
 func SignupPost(c *gin.Context){
-	c.Request.ParseForm()
-	// for key,value := range c.Request.PostForm{
-		name := c.Request.PostForm["name"][0]
-		username := c.Request.PostForm["username"][0]
-		email := c.Request.PostForm["email"][0]
-		passwd1 := c.Request.PostForm["pwd1"][0]
-		passwd2  := c.Request.PostForm["pwd2"][0]
-		fmt.Println(name,username,email,passwd1,passwd2)
-		database.InsertRec(name,email,username,passwd1,false)
-	// }
-
-	c.HTML( // after addding new user direct to login page
-		http.StatusOK,
-		"index_login.html",
-		gin.H{"title": "User Login"},
-	)
+	isLoggedIN,_ := c.Cookie ("sid_cookie")
+	if ( isLoggedIN != "" ){ // If user is loged in then no need to show sign-in page ( while click on back)
+		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN)
+		HomePageValues.Name = strings.ToUpper(LoggedUserDetail.Name)
+		isAdmin := LoggedUserDetail.IsAdmn
+		if (isAdmin){ // if admin make admin button visible
+			HomePageValues.AdmnButonVisibility = "visible"
+		}else {
+			HomePageValues.AdmnButonVisibility = "hidden"
+		}
+		c.HTML(
+			http.StatusOK,
+			"home.html",
+			HomePageValues,
+		)
+	}else{
+		c.Request.ParseForm()
+		// for key,value := range c.Request.PostForm{
+			name := c.Request.PostForm["name"][0]
+			username := c.Request.PostForm["username"][0]
+			email := c.Request.PostForm["email"][0]
+			passwd1 := c.Request.PostForm["pwd1"][0]
+			passwd2  := c.Request.PostForm["pwd2"][0]
+			fmt.Println(name,username,email,passwd1,passwd2)
+			database.InsertRec(name,email,username,passwd1,false)
+		// }
+		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+		c.HTML( // after addding new user direct to login page
+			http.StatusOK,
+			"index_login.html",
+			gin.H{"title": "User Login"},
+		)
+	}
 
 }
 //AdmnpanelGet ...

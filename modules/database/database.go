@@ -72,6 +72,8 @@ func AddSessionID(usrName string)(string) {
 
 //DelUser .. 
 func DelUser(uname string){
+	
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     
     filter := bson.M{"usrnm" : uname}
     client, err := mongo.Connect(context.TODO(), ClientOptions)
@@ -84,6 +86,8 @@ func DelUser(uname string){
 }
 //FindAllUsers ...
 func FindAllUsers(name string)([]bson.M){
+
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     fmt.Println("Inside FindAllUsers")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
@@ -112,6 +116,8 @@ func FindAllUsers(name string)([]bson.M){
 
 //GetUser ... to get user , to pick only one , used while updating only
 func GetUser(usrName string)(bool,User){
+
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     var result User
     filter := bson.M{"usrnm" : usrName}
     
@@ -130,6 +136,8 @@ func GetUser(usrName string)(bool,User){
 }
 //TraceUserWithSID ... 
 func TraceUserWithSID(receivedCookie string)(bool,User){
+
+    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
     var result User
     filter := bson.M{"sess_id" : receivedCookie }
     

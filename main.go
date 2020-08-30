@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"github.com/go-arun/adminpanel/modules/database"
+	"github.com/go-arun/adminpanel/modules/securepwd"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"go.mongodb.org/mongo-driver/bson"
+	
 )
 
 //LoggedUserDetail .. to store details of users 
@@ -69,6 +71,7 @@ func LoginPageGet(c *gin.Context) {
 				usrPwd = value[0]
 			}
 		}
+		//usrPwd = 
 		var usrExists bool
 		usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
 
@@ -205,8 +208,8 @@ func SignupPost(c *gin.Context){
 			username := c.Request.PostForm["username"][0]
 			email := c.Request.PostForm["email"][0]
 			passwd1 := c.Request.PostForm["pwd1"][0]
-			passwd2  := c.Request.PostForm["pwd2"][0]
-			fmt.Println(name,username,email,passwd1,passwd2)
+			passwd1,_ = securepwd.HashPassword(passwd1) //hashing
+			fmt.Println(name,username,email,passwd1)
 			database.InsertRec(name,email,username,passwd1,false)
 		// }
 		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
@@ -266,6 +269,7 @@ func UpdatePost(c *gin.Context){
 		// username := c.Request.PostForm["username"][0]
 		email := c.Request.PostForm["email"][0]
 		passwd1 := c.Request.PostForm["pwd1"][0]
+		passwd1,_ = securepwd.HashPassword(passwd1) //hashing
 		database.UpdateRec(name,email,username,passwd1,false)
 		
 		c.HTML( // after updation loading admin page

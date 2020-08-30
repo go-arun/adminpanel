@@ -9,7 +9,8 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
     "crypto/rand"
-	"io"
+    "io"
+    "github.com/go-arun/adminpanel/modules/securepwd"
 )
 
 //User ...
@@ -148,7 +149,7 @@ func TraceUserWithSID(receivedCookie string)(bool,User){
 func UserValidaiton(uname,pwd string)(bool,User){
     var result User
     
-    filter := bson.M{"usrnm" : uname,"pwd" : pwd}
+    filter := bson.M{"usrnm" : uname}
     
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
@@ -160,7 +161,11 @@ func UserValidaiton(uname,pwd string)(bool,User){
          return false,result // no such user 
     }
     fmt.Printf("Found a single document: %+v\n", result)
-    return true,result // yes credetial exists 
+    //User exists , so will check pwd with hash too 
+    match := securepwd.CheckPasswordHash(pwd, result.Pwd) // will reutn true / false
+    fmt.Println("Password match result",match,pwd)
+
+    return match,result // yes credetial exists 
 }
 
 //InsertRec to insert into database

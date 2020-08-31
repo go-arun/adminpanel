@@ -147,7 +147,8 @@ func TraceUserWithSID(receivedCookie string)(bool,User){
     }
     Collection := client.Database("admnpanel").Collection("users")
     err = Collection.FindOne(context.TODO(), filter).Decode(&result)
-    if err != nil {
+    if err != nil  {
+        fmt.Printf("No mactching record found for this SID !!")
          return false,result // no rec found with this sec-id
     }
     fmt.Printf("Found a single document: %+v\n", result)

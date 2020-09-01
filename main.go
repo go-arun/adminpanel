@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 	"go.mongodb.org/mongo-driver/bson"
-	
 )
 
 //LoggedUserDetail .. to store details of users 
@@ -293,8 +292,25 @@ func HomepagePost(c *gin.Context){
 	"",false,false,
 	)
 }
-
-
+//HomepageGet ...
+func HomepageGet(c *gin.Context) {
+	//var recordFound bool
+	fmt.Println("inside HomepageGet....")
+	recordFound,HomePageValues := getHomePageIfsessionActive(c)
+	if (recordFound){
+		c.HTML(
+			http.StatusOK,
+			"home.html",
+			HomePageValues,
+		)
+	}else{
+		c.HTML(
+			http.StatusOK,
+			"index_login.html",
+			gin.H{"title": "User Login"},
+		)
+	}
+}
 
 func main(){
 	//database.InsertRec("Arun","ar@ar2.com","kumarcok1","pwd2",true)
@@ -304,6 +320,7 @@ func main(){
 	router.GET("/", LoginPageGet)
 	router.POST("/", LoginPagePost)
 	router.POST("/home",HomepagePost)
+	router.GET("/home",HomepageGet)
 	router.GET("/signup",SignupGet)
 	router.POST("/signup",SignupPost)
 	router.GET("/admnpanel",AdmnpanelGet)

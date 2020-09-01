@@ -241,10 +241,11 @@ func AdmnpanelGet(c *gin.Context){
 		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN) 
 		isAdmin := LoggedUserDetail.IsAdmn						
 		if (isAdmin){
-			c.HTML( //He is admin..
-				http.StatusOK,
-				"admnpanel.html",gin.H{
-				"LoggedUserDetail": LoggedUserDetail,
+			searchResults := database.FindAllUsers("")
+			c.HTML(											
+			http.StatusOK,
+			"admnpanel.html",gin.H{
+			"CollectedUserDetail": searchResults,
 			})
 
 		}else{ // This is normal user, direct to home page

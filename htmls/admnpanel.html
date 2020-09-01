@@ -33,7 +33,7 @@
       </table>
       <!-- <input type="button" value="Back" onclick="history.go(-1)"> -->
       <!-- <input type="button" onclick="location.href='http://192.168.227.46:8080/home';" value="Home"> -->
-      <input type="button" onclick="location.href='https://goadminpanel.herokuapp.com/home';" value="Home">
+      <!-- <input type="button" onclick="location.href='https://goadminpanel.herokuapp.com/home';" value="Home"> -->
       <input id="modi" onclick="submitWithActionVal(this.id)" type="button" value="Modify">
       <input id="del" onclick="submitWithActionVal(this.id)" type="button" value="Delete">
       <input id="logout" onclick="submitWithActionVal(this.id)" type="button" value="Logout">
@@ -51,19 +51,35 @@ td {
 th {
   font-weight: bold;
 }
-      </style>
-      <script>
-        function submitWithActionVal(clicked_id){
-          var rowCount = document.getElementById("users_tble").rows.length;
-          // alert ( rowCount)
-          if (rowCount == 1 && clicked_id != "find" && clicked_id != "logout"){
-            alert("First Do a Search and Select one User to Proceed!!")
-            return
-          }
-          document.getElementById("optedto").value = clicked_id
-          document.getElementById("admnForm").submit()
-        }
-      </script>
+</style>
+<script>
+function submitWithActionVal(clicked_id){
+  var rowCount = document.getElementById("users_tble").rows.length;
+  if (rowCount == 1 && clicked_id != "find" && clicked_id != "logout"){
+    alert("First Do a Search and Select one User to Proceed!!")
+    return
+  }
+  if (clicked_id == "del"){
+    var delconfirm=confirm("Are you sure you want to delete this record?");
+    if (delconfirm==true){
+      alert ("Record deleted")
+      document.getElementById("optedto").value = clicked_id
+      document.getElementById("admnForm").submit()
+    }else{
+      alert("Record Not Deleted")
+    }
+  }else{
+    document.getElementById("optedto").value = clicked_id
+    document.getElementById("admnForm").submit()
+  }
 
+}
+
+function preback(){
+    window.history.forward();
+}
+setTimeout("preback()",0);
+window.onunload=function(){null};
+</script>
 </body>
 </html>

@@ -45,7 +45,8 @@ func LoginPageGet(c *gin.Context) {
 
 // To Load homme page , if there is an existing valid Sesion ID in DB
 func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues values) { 
-	sessionCookie,_ := c.Cookie ("sid_cookie")
+	sessionCookie,err := c.Cookie ("user_sid_cookie")
+	fmt.Println("err Val -->",err)
 	if sessionCookie == "" { // no cookie found 
 		return recordFound,HomePageValues // by default 'recordFound' val will be false
 	}
@@ -87,8 +88,8 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 		usrExists,LoggedUserDetail = database.UserValidaiton(usrName,usrPwd)
 
 		if (!usrExists){ // Login Error
-			c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
-			c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+			//c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+			//c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
 			c.HTML(
 				http.StatusOK,
 				"login_err.html",
@@ -97,7 +98,7 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 		}else{ //Login Success
 			//generating session ID using UUID 
 			sessionID := database.AddSessionID(usrName) 
-			c.SetCookie("sid_cookie",
+			c.SetCookie("user_sid_cookie",
 			sessionID,
 			3600*12, // 12hrs
 			"/",
@@ -111,8 +112,8 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 			}else {
 				HomePageValues.AdmnButonVisibility = "hidden"
 			}
-			c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
-			c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+			//c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+			//c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
 
 			if (!isAdmin){
 				c.HTML(
@@ -145,6 +146,7 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 		searchKey := c.Request.PostForm["searchkey"][0] // Value in Find textbox
 		// _,LoggedUserDetail = database.GetUsers(searchKey)
 		searchResults = database.FindAllUsers(searchKey)
+		fmt.Println("SearchKey------>",searchKey)
 	case "del":
 		database.DelUser(c.Request.PostForm["select"][0]) // uname of selected one 
 		LoggedUserDetail = zeroLoggedUserDetail // if not made th
@@ -153,11 +155,11 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 		c.Redirect(http.StatusMovedPermanently, "/update")
 		c.Abort()
 	case "logout":
-		sidFromBrwser,_ := c.Cookie ("sid_cookie")
+		sidFromBrwser,_ := c.Cookie ("admin_sid_cookie")
 		database.RemoveSessionID(sidFromBrwser)
-		c.Redirect(http.StatusMovedPermanently, "/") // redirecting to loging page
+		c.Redirect(http.StatusMovedPermanently, "/admin") // redirecting to admin loging page
 		c.Abort()
-		c.SetCookie("sid_cookie", // Deleting cookie
+		c.SetCookie("admin_sid_cookie", // Deleting cookie
 		"",
 		-1, // delete now !!
 		"/",
@@ -166,9 +168,9 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 	}
 	fmt.Println( "val of operation -->",operation)
 	if (operation != "modi" && operation != "logout" ){ // redirection should happen if the operatiom  is not for modification and Logout
-		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
-		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
-		searchResults = database.FindAllUsers("") // added at the time of interview ..
+		//c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
+		//c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+		//searchResults = database.FindAllUsers("") // added at the time of interview ..
 		c.HTML(											
 			http.StatusOK,
 			"admnpanel.html",gin.H{
@@ -192,7 +194,7 @@ func SignupGet( c *gin.Context){
 		c.HTML(
 			http.StatusOK,
 			"signup.html",
-			gin.H{"title": "User Login"},
+			[]string{"hidden"},
 		)
 	}
 
@@ -221,57 +223,56 @@ func SignupPost(c *gin.Context){
 			email := c.Request.PostForm["email"][0]
 			passwd1 := c.Request.PostForm["pwd1"][0]
 			passwd1,_ = securepwd.HashPassword(passwd1) //hashing
-			database.InsertRec(name,email,username,passwd1,false)
-		// }
-		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
-		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
-		c.HTML( // after addding new user direct to login page
-			http.StatusOK,
-			"index_login.html",
-			gin.H{"title": "User Login"},
-		)
+			err := database.InsertRec(name,email,username,passwd1,false)
+			if (err != nil ){
+				c.HTML( // after addding new user direct to login page
+					http.StatusOK,
+					"signup.html",
+					[]string{"visible"},
+				)
+			}else{
+				c.HTML( // after addding new user direct to login page
+				http.StatusOK,
+				"index_login.html",
+				gin.H{"title": "User Login"},
+			)
+		}
 	}
 
 }
 //AdmnpanelGet ...
 func AdmnpanelGet(c *gin.Context){ 
-	recordFound,_ := getHomePageIfsessionActive(c)
-	if (recordFound){ // show admin page only if session active for an admin user
-		isLoggedIN,_ := c.Cookie ("sid_cookie")// here two times cookies are accessing find and alternat logic TODO
-		_,LoggedUserDetail = database.TraceUserWithSID(isLoggedIN) 
-		isAdmin := LoggedUserDetail.IsAdmn						
-		if (isAdmin){
-			searchResults := database.FindAllUsers("")
-			c.HTML(											
+	if (admnSessinStatus(c)) {
+		searchResults := database.FindAllUsers("")
+		c.HTML(											
 			http.StatusOK,
 			"admnpanel.html",gin.H{
 			"CollectedUserDetail": searchResults,
 			})
-
-		}else{ // This is normal user, direct to home page
-			c.HTML(
-				http.StatusOK,
-				"home.html",
-				HomePageValues,
-			)
-		}
-
 	}else{
-		c.HTML( // No active session so directing to login page
+		c.HTML(
 			http.StatusOK,
-			"index_login.html",
+			"admin_login.html",
 			gin.H{"title": "User Login"},
 		)
 	}
 }
 //UpdateGet ... 
 func UpdateGet(c *gin.Context){
-	_,LoggedUserDetail = database.GetUser(username)
-	c.HTML(
-		http.StatusOK,
-		"update.html",gin.H{
-		"CollectedUserDetail": LoggedUserDetail,
-	})
+	if (admnSessinStatus(c)) {
+		_,LoggedUserDetail = database.GetUser(username)
+		c.HTML(
+			http.StatusOK,
+			"update.html",gin.H{
+			"CollectedUserDetail": LoggedUserDetail,
+		})
+	}else{
+		c.HTML(
+			http.StatusOK,
+			"admin_login.html",
+			gin.H{"title": "User Login"},
+		)
+	}
 }
 //UpdatePost ... 
 func UpdatePost(c *gin.Context){
@@ -296,11 +297,11 @@ func UpdatePost(c *gin.Context){
 //HomepagePost ...
 func HomepagePost(c *gin.Context){
 	//Handling Log Out
-	sidFromBrwser,_ := c.Cookie ("sid_cookie")
+	sidFromBrwser,_ := c.Cookie ("user_sid_cookie")
 	database.RemoveSessionID(sidFromBrwser)
 	c.Redirect(http.StatusMovedPermanently, "/") // redirecting to loging page
 	c.Abort()
-	c.SetCookie("sid_cookie", // Deleting cookie
+	c.SetCookie("user_sid_cookie", // Deleting cookie
 	"",
 	-1, // delete now !!
 	"/",
@@ -326,9 +327,52 @@ func HomepageGet(c *gin.Context) {
 		)
 	}
 }
+//AdminLoginGet ...
+func AdminLoginGet( c *gin.Context){
+	if (admnSessinStatus(c)) {
+		searchResults := database.FindAllUsers("")
+		c.HTML(											
+			http.StatusOK,
+			"admnpanel.html",gin.H{
+			"CollectedUserDetail": searchResults,
+			})
+	}else{
+		c.HTML(
+			http.StatusOK,
+			"admin_login.html",
+			gin.H{"title": "User Login"},
+		)
+	}
+}
+//AdminLoginPost ...
+func AdminLoginPost( c *gin.Context){
+	sessionID := database.AddAdminSessionID() 
+	c.SetCookie("admin_sid_cookie",
+	sessionID,
+	3600*12, // 12hrs
+	"/",
+	"",false,false, //domain excluded 
+	)
+	searchResults := database.FindAllUsers("")
+	c.HTML(											
+		http.StatusOK,
+		"admnpanel.html",gin.H{
+		"CollectedUserDetail": searchResults,
+		},
+	)
+}
+
+func admnSessinStatus(c *gin.Context)(sesStatus bool) { 
+	sessionCookie,_ := c.Cookie ("admin_sid_cookie")
+	if sessionCookie == "" { // no cookie found 
+		return sesStatus // by default 'recordFound' val will be false
+	} //cookie received frim boeser still we need to ensure from database too
+	sesStatus,_ = database.TraceUserWithSID(sessionCookie)
+	fmt.Println("Admin Session Exissts ?",sesStatus)
+	return sesStatus // 
+}
 
 func main(){
-	//database.InsertRec("Arun","ar@ar2.com","kumarcok1","pwd2",true)
 	router := gin.Default()
 	router.LoadHTMLGlob("htmls/*")
 
@@ -342,6 +386,8 @@ func main(){
 	router.POST("/admnpanel",AdmnpanelPost)
 	router.GET("/update",UpdateGet)
 	router.POST("/update",UpdatePost)
+	router.GET("/admin",AdminLoginGet)
+	router.POST("/admin",AdminLoginPost)
 
 
      router.Run()

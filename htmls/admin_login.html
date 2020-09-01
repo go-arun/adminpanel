@@ -9,12 +9,11 @@
 </head>
 
 <body>
-    <form action="/" method="POST" onsubmit="return verify_inputs()">
+    <form action="/admin" method="POST" onsubmit="return verify_inputs()">
     <div class="container" >
+        <h4>Admin Login:</h4>
         <input id="uname" name="usrname" type="text" placeholder="Username"><br>
         <input id="pwd" name="passwd" type="password" style="margin-top: 5px;" placeholder="Password"><br>
-        <a href="http://192.168.227.46:8080/signup" class="button">Create New User</a>
-        <!-- <a href="https://goadminpanel.herokuapp.com/signup" class="button">Create New User</a> -->
         <input type="submit" value="Login" style="margin-top: 10px; margin-left: 10px;">
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

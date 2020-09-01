@@ -14,7 +14,7 @@
     <input id="email" name="email" value="{{ .Email }}" placeholder="Email" type="text"><br>
     <input id="pwd1" name="pwd1" placeholder="Password" type="password"><br>
     <input id="pwd2" name="pwd2" placeholder="Re Type Password" type="password"><br>
-    <input type="button" value="Back" onclick="history.go(-1)">
+    <input type="button" onclick="location.href='http://192.168.227.46:8080/admnpanel';" value="Back">
     <input type="submit" value="Update">
     {{ end }}
     
@@ -44,6 +44,11 @@
         var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
         return emailReg.test( $email );
     }
+function preback(){
+window.history.forward();
+}
+setTimeout("preback()",0);
+window.onunload=function(){null};
 </script>
 </form>
 

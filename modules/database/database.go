@@ -30,7 +30,7 @@ var ClientOptions *options.ClientOptions
 
 //RemoveSessionID ... 
 func RemoveSessionID(sid string) {
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
@@ -51,7 +51,7 @@ func RemoveSessionID(sid string) {
 //AddSessionID ... 
 func AddSessionID(usrName string)(string) {
     sessID,_ := generateNewUUID()
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
@@ -69,11 +69,32 @@ func AddSessionID(usrName string)(string) {
     fmt.Println("SessID Added-",updateResult)
     return sessID
 }
+//AddAdminSessionID ... to inset admin sesid to db
+func AddAdminSessionID()(string) {
+    sessID,_ := generateNewUUID()
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+    client, err := mongo.Connect(context.TODO(), ClientOptions)
+    if err != nil {
+        log.Fatal(err)
+    }
+    Collection := client.Database("admnpanel").Collection("users")
+    filter := bson.D{{"isadmn", true}}
+        update := bson.D{{"$set", bson.D{
+            {"sess_id", sessID},//UUID
+        }}}
+    
+	updateResult, err := Collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println("SessID Added-",updateResult)
+    return sessID
+}
 
 //DelUser .. 
 func DelUser(uname string){
 	
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     
     filter := bson.M{"usrnm" : uname}
     client, err := mongo.Connect(context.TODO(), ClientOptions)
@@ -87,14 +108,14 @@ func DelUser(uname string){
 //FindAllUsers ...
 func FindAllUsers(name string)([]bson.M){
 
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     fmt.Println("Inside FindAllUsers")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
     }
-    filter := bson.D{{"name", primitive.Regex{Pattern: name}}}
-    Collection := client.Database("admnpanel").Collection("users")
+    filter := bson.D{{"name", primitive.Regex{Pattern: "^"+name}}}
+    Collection := client.Database("admnpanel").Collection("users")  
   
     cursor, err := Collection.Find(context.TODO(), filter)
     if err != nil {
@@ -117,7 +138,7 @@ func FindAllUsers(name string)([]bson.M){
 //GetUser ... to get user , to pick only one , used while updating only
 func GetUser(usrName string)(bool,User){
 
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     var result User
     filter := bson.M{"usrnm" : usrName}
     
@@ -137,7 +158,7 @@ func GetUser(usrName string)(bool,User){
 //TraceUserWithSID ... 
 func TraceUserWithSID(receivedCookie string)(bool,User){
 
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     var result User
     filter := bson.M{"sess_id" : receivedCookie }
     
@@ -149,7 +170,7 @@ func TraceUserWithSID(receivedCookie string)(bool,User){
     err = Collection.FindOne(context.TODO(), filter).Decode(&result)
     if err != nil  {
         fmt.Printf("No mactching record found for this SID !!")
-         return false,result // no rec found with this sec-id
+        return false,result // no rec found with this sec-id
     }
     fmt.Printf("Found a single document: %+v\n", result)
     return true,result // found one 
@@ -157,7 +178,7 @@ func TraceUserWithSID(receivedCookie string)(bool,User){
 //UserValidaiton in LoginPage
 func UserValidaiton(uname,pwd string)(bool,User){
     var result User
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     
     filter := bson.M{"usrnm" : uname}
     
@@ -179,8 +200,8 @@ func UserValidaiton(uname,pwd string)(bool,User){
 }
 
 //InsertRec to insert into database
-func InsertRec(name,email,usrName,pwd string,adminStatus bool){
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+func InsertRec(name,email,usrName,pwd string,adminStatus bool)(error){
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)
@@ -195,14 +216,15 @@ func InsertRec(name,email,usrName,pwd string,adminStatus bool){
 
 	insertResult, err := Collection.InsertOne(context.TODO(), usr)
 	if err != nil {
-    	log.Fatal(err)
+    	return err
     }
 fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+return nil
 }
 
 //UpdateRec to insert into database
 func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
-    ClientOptions := options.Client().ApplyURI("mongodb+srv://mongo-user:a3uge3@cluster0.jfgwr.mongodb.net/admnpanel?retryWrites=true&w=majority")
+    ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
         log.Fatal(err)

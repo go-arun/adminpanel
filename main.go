@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"go.mongodb.org/mongo-driver/bson"
+	
 )
 
 //LoggedUserDetail .. to store details of users 
@@ -112,11 +113,21 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 			}
 			c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
 			c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
-			c.HTML(
-				http.StatusOK,
-				"home.html",
-				HomePageValues,
-			)
+
+			if (!isAdmin){
+				c.HTML(
+					http.StatusOK,
+					"home.html",
+					HomePageValues,
+				)
+			}else{
+				searchResults := database.FindAllUsers("")
+			c.HTML(											
+			http.StatusOK,
+			"admnpanel.html",gin.H{
+			"CollectedUserDetail": searchResults,
+			})
+			}
 		}
 	}
  }
@@ -128,7 +139,7 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 	
 
 	operation :=  c.Request.PostForm["action"][0] 
-	
+	searchResults = database.FindAllUsers("") // always need to show full list afte modi del or update
 	switch operation{ // based on action value
 	case "find":
 		searchKey := c.Request.PostForm["searchkey"][0] // Value in Find textbox
@@ -153,9 +164,11 @@ func getHomePageIfsessionActive(c *gin.Context)(recordFound bool,HomePageValues 
 		"",false,false,
 		)
 	}
+	fmt.Println( "val of operation -->",operation)
 	if (operation != "modi" && operation != "logout" ){ // redirection should happen if the operatiom  is not for modification and Logout
 		c.Header("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate, value")
 		c.Header("Expires", "Thu, 01 Jan 1970 00:00:00 GMT")
+		searchResults = database.FindAllUsers("") // added at the time of interview ..
 		c.HTML(											
 			http.StatusOK,
 			"admnpanel.html",gin.H{
@@ -272,10 +285,11 @@ func UpdatePost(c *gin.Context){
 		}
 		database.UpdateRec(name,email,username,passwd1,false)
 		
-		c.HTML( // after updation loading admin page
-			http.StatusOK,
-			"admnpanel.html",gin.H{
-			"LoggedUserDetail": LoggedUserDetail,
+		searchResults := database.FindAllUsers("")
+		c.HTML(											
+		http.StatusOK,
+		"admnpanel.html",gin.H{
+		"CollectedUserDetail": searchResults,
 		})
 }
 //HomepagePost ...
@@ -292,10 +306,10 @@ func HomepagePost(c *gin.Context){
 	"",false,false,
 	)
 }
-//HomepageGet ...
+//
 func HomepageGet(c *gin.Context) {
 	//var recordFound bool
-	fmt.Println("inside HomepageGet....")
+	fmt.Println("inside LoginpageGET....")
 	recordFound,HomePageValues := getHomePageIfsessionActive(c)
 	if (recordFound){
 		c.HTML(

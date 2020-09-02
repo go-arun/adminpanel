@@ -223,7 +223,7 @@ return nil
 }
 
 //UpdateRec to insert into database
-func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
+func UpdateRec(name,email,usrName,pwd string,adminStatus bool)(error){
     ClientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
     client, err := mongo.Connect(context.TODO(), ClientOptions)
     if err != nil {
@@ -240,7 +240,7 @@ func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
         }}}
         _, err := Collection.UpdateOne(context.TODO(), filter, update)
         if err != nil {
-            log.Fatal(err)
+            return err
         }
     }else{ // if passwd is empty means, keep it same
         update := bson.D{{"$set", bson.D{
@@ -249,10 +249,10 @@ func UpdateRec(name,email,usrName,pwd string,adminStatus bool){
         }}}
         _, err := Collection.UpdateOne(context.TODO(), filter, update) //Update result ignored 
         if err != nil {
-            log.Fatal(err)
+            return err
         }
-
     }
+    return nil
 
 }
 

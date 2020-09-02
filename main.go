@@ -285,14 +285,23 @@ func UpdatePost(c *gin.Context){
 		if (passwd1 != ""){ // Only if admin is changing pwd then only need to hash
 			passwd1,_ = securepwd.HashPassword(passwd1) //hashing
 		}
-		database.UpdateRec(name,email,username,passwd1,false)
-		
-		searchResults := database.FindAllUsers("")
-		c.HTML(											
-		http.StatusOK,
-		"admnpanel.html",gin.H{
-		"CollectedUserDetail": searchResults,
-		})
+		err := database.UpdateRec(name,email,username,passwd1,false)
+		fmt.Println("Database update status --",err)
+		if ( err != nil){
+			_,LoggedUserDetail = database.GetUser(username)
+			c.HTML(
+				http.StatusOK,
+				"update_err.html",gin.H{
+				"CollectedUserDetail": LoggedUserDetail,
+			})
+		}else {
+			searchResults := database.FindAllUsers("")
+			c.HTML(											
+			http.StatusOK,
+			"admnpanel.html",gin.H{
+			"CollectedUserDetail": searchResults,
+			})
+		}
 }
 //HomepagePost ...
 func HomepagePost(c *gin.Context){

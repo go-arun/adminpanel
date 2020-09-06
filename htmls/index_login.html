@@ -5,21 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="htmls/style.css">
+    <style>
+        body,html {
+        height: 100%;
+        }
+    </style>
 </head>
-
 <body>
-    <form action="/" method="POST" onsubmit="return verify_inputs()">
-    <div class="container" >
-        <input id="uname" name="usrname" type="text" placeholder="Username"><br>
-        <input id="pwd" name="passwd" type="password" style="margin-top: 5px;" placeholder="Password"><br>
-        <a href="http://172.17.8.152:8080/signup" class="button">Create New User</a>
-        <!-- <a href="https://goadminpanel.herokuapp.com/signup" class="button">Create New User</a> -->
-        <input type="submit" value="Login" style="margin-top: 10px; margin-left: 10px;">
+    <div class="container h-100">
+
+            <div class="row align-items-center h-100">
+
+                <div class="mx-auto">
+                    <form action="/" method="POST" onsubmit="return verify_inputs()">
+                        <div class="jumbotron">
+                            <!-- <form action="/" method="POST" onsubmit="return verify_inputs()"></form> -->
+                            <input id="uname" name="usrname" type="text" placeholder="Username"><br>
+                            <input id="pwd" name="passwd" type="password" style="margin-top: 5px;" placeholder="Password"><br>
+                            <a href="http://192.168.43.27:8080/signup" class="button">Create New User</a>
+                            <!-- <a href="https://goadminpanel.herokuapp.com/signup" class="button">Create New User</a> -->
+                            <input type="submit" value="Login" style="margin-top: 10px; margin-left: 10px;">
+                            <!-- </form>  -->
+                        </div>
+                    </form>
+
+                   </div>
+
+                </div>
+
+            </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
 <script>
     function  verify_inputs(){
 	    var uname = document.getElementById("uname").value;
@@ -39,6 +56,10 @@ function preback(){
 setTimeout("preback()",0);
 window.onunload=function(){null};
 </script>
-</form>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
 </body>
 </html>
